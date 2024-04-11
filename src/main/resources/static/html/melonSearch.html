@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>멜론 차트100 조회하기</title>
+    <link rel="stylesheet" href="/css/table.css"/>
+    <script type="text/javascript" src="/js/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="/js/jquery.serializeObject.min.js"></script>
+    <script type="text/javascript">
+        // HTML 로딩이 완료되고 실행됨
+        $(document).ready(function () {
+            // 버튼 클릭했을때, 발생되는 이벤트 생성함 (onclick 이벤트와 동일함)
+            $("#btnSend").on("click", function () {
+
+                // Ajax 호출해서 멜론차트 조회하기
+                $.ajax({
+                    url: "/melon/v1/getSingerSong",
+                    type: "post",
+                    contentType: "application/json",
+                    dataType: "JSON",
+                    data: JSON.stringify(
+                        $("#f").serializeObject()
+                    )
+                }).then(
+                    function (json) {
+                        const result = json.data;
+
+                        for (const data of result) {
+                            $("#melonData").append("<div class=\"divTableRow\">");
+                            $("#melonData").append("<div class=\"divtableCell\">" + data.song + "</div>");
+                            $("#melonData").append("<div class=\"divTableCell\">" + data.singer + "</div>");
+                            $("#melonData").append("</div>");
+                        }
+                    }
+                )
+            })
+
+        });
+    </script>
+</head>
+<body>
+<h2>멜론 차트100 조회하기</h2>
+<hr/>
+<br/>
+<br/>
+
+<form name="f" id="f">
+    <div class="divTable minimalistBlack">
+        <div class="divTableBody">
+            <div class="divTableRow">
+                <div class="divTableCell">
+                    <label>검색할 가수이름
+                        <input type="text" name="singer"/>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div>
+        <button id="btnSend" type="button">멜론 차트100 조회하기</button>
+    </div>
+</form>
+<br/>
+<br/>
+<div class="divTable minimalistBlack">
+    <div class="divTableHeading">
+        <div class="divTableRow">
+            <div class="divTableHead">노래제목</div>
+            <div class="divTableHead">가수</div>
+        </div>
+
+    </div>
+    <div class="divTableBody" id="melonData">
+        <!--        ajax 로 받은 데이터가 여기 들어옴!!-->
+    </div>
+
+</div>
+</body>
+</html>
