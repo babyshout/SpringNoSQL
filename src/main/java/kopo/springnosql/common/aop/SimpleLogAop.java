@@ -11,6 +11,8 @@ import org.aspectj.util.GenericSignature;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.List;
 
 @Slf4j
 @Aspect
@@ -26,11 +28,24 @@ public class SimpleLogAop {
     public void beforeParameterLog(JoinPoint joinPoint) {
         // 메서드 정보 받아오기
         Method method = getMethod(joinPoint);
-        log.info("================== method START name = {} ================", method.getName());
+//        log.info("================== method START name = {} ================", method.getName());
+
+        log.info("================== method START name = {} ================", joinPoint.getSignature());
+
+
+//        log.info("joinPoint.getKind() : " + joinPoint.getKind());
+//        log.info("joinPoint.toLongString()" + joinPoint.toLongString());
+//        log.info("joinPoint.toShortString()" + joinPoint.toShortString());
+//        log.info("joinPoint.toString()" + joinPoint.toString());
+//        log.info("joinPoint.getThis() {}",joinPoint.getThis());
+//        log.info("joinPoint.getArgs() {}",joinPoint.getArgs());
+//        log.info("joinPoint.getSignature() {}",joinPoint.getSignature());
+//        log.info("joinPoint.getTarget() {}",joinPoint.getTarget());
+//        log.info("joinPoint.getStaticPart() {}",joinPoint.getStaticPart());
 
         // 파라미터 받아오기
         Object[] args = joinPoint.getArgs();
-        if (args.length <= 0) {
+        if (args.length == 0) {
             log.info("no Parameter");
         }
 
@@ -39,18 +54,25 @@ public class SimpleLogAop {
             log.info("parameter type = {}", arg);
         }
 
-        log.info("================== method START name = {} ================", method.getName());
+//        log.info("================== method START name = {} ================", joinPoint.getSignature());
     }
 
     @AfterReturning(value = "cut()", returning = "returnObj")
     public void afterReturnLog(JoinPoint joinPoint, Object returnObj){
         // 메서드 정보 받아오기
         Method method = getMethod(joinPoint);
-        log.info("================== method END name = {} ================", method.getName());
+//        log.info("================== method END name = {} ================", joinPoint.getSignature());
+//        log.info("================== method END name = {} ================", method.getName());
 
         log.info("return type = {}", returnObj.getClass().getSimpleName());
+        if (returnObj instanceof Collection<?>) {
+            ((Collection<?>) returnObj).parallelStream().limit(5).forEach(value -> log.info("returnObj's value : " + value));
+        } else {
         log.info("return value = {}", returnObj);
-        log.info("================== method END name = {} ================", method.getName());
+
+        }
+        log.info("================== method END name = {} ================", joinPoint.getSignature());
+//        log.info("================== method END name = {} ================", method.getName());
     }
     private Method getMethod(JoinPoint joinPoint) {
 

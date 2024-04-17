@@ -155,4 +155,17 @@ public class MelonController {
                 CommonApiResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rList)
         );
     }
+
+    @PostMapping("updateField")
+    public ResponseEntity updateField(@RequestBody MelonDTO pDTO) {
+        log.trace("pDTO : " + pDTO);
+
+        // Java 8 부터 제공되는 Optional 활용하여 NPE(Null Pointer Exception) 처리
+        List<MelonDTO> rList = Optional.ofNullable(melonService.updateField(pDTO)
+        ).orElseGet(ArrayList::new);
+
+        return ResponseEntity.ok(
+                CommonApiResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rList)
+        );
+    }
 }

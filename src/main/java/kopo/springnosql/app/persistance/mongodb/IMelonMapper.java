@@ -52,10 +52,31 @@ public interface IMelonMapper {
     /**
      * MongoDB insertMany 함수를 통해 멜론차트 저장하기
      * 한건 insert 대비 속도가 빠름
+     * 기존 collection 삭제함!!
      *
      * @param CollectionName 저장할 컬렉션 이름
      * @param pList 저장될 정보
      * @return 저장 결과
      */
     int insertManyField(String CollectionName, List<MelonDTO> pList);
+
+    /**
+     * 필드 값 수정하기
+     * 예 : 가수의 이름 수정하기
+     * <a href='www.naver.com'>asdf</a>
+     *
+     * @param collectionName 저장할 컬렉션 이름
+     * @param  pDTO 수정할 가수 이름, 수정될 가수 이름 정보
+     * @return 저장 결과
+     */
+    int updateField(String collectionName, MelonDTO pDTO);
+
+    /**
+     * 수정된 가수이름의 노래 가져오기
+     *
+     * @param collectionName 조회할 컬렉션 이름
+     * @param pDTO 가수명
+     * @return 노래 리스트
+     */
+    List<MelonDTO> getUpdateSinger(String collectionName, MelonDTO pDTO);
 }

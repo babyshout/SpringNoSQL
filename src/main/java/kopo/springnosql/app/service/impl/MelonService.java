@@ -196,6 +196,7 @@ public class MelonService implements IMelonService {
 
         // 생성할 컬렉션명
         String collectionName = getCollectionName();
+        log.trace("collectionName : " + getCollectionName());
 
         // MongoDB 에 데이터 저장하기
         if (melonMapper.insertManyField(collectionName, this.doCollect()) == 1) {
@@ -204,6 +205,42 @@ public class MelonService implements IMelonService {
         }
 
         return rList;
+    }
+
+    /**
+     * singer 필드의 값인 방탄소년단을 BTS 로 변경하기
+     *
+     * @param pDTO
+     */
+    @Override
+    public List<MelonDTO> updateField(MelonDTO pDTO) {
+
+        List<MelonDTO> rList = null;
+
+        // 수정할 컬렉션
+        String collectionName = getCollectionName();
+
+        // 기존 수집된 멜론 Top100 수집한 컬렉션 삭제하기
+        melonMapper.dropCollection(collectionName);
+
+        // 멜론 top100 수집하기
+        if (this.collectMelonSong() == 1) {
+            // 예 : singer 필드에 저장된 '방탄소년단' 값을 'BTS' 로 변경하기
+            if (melonMapper.updateField(collectionName, pDTO) != 1) {
+                throw new RuntimeException();
+            }
+                // 변경된 값을 확인하기 위해 MongoDB 로부터 데이터 조회하기
+                rList = melonMapper.getUpdateSinger(collectionName, pDTO);
+        }
+
+        try {
+            throw new Exception();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+
+        return rList;
+        }
     }
 
     private String getCollectionName() {
