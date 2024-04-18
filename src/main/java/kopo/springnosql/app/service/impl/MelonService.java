@@ -53,8 +53,8 @@ public class MelonService implements IMelonService {
                     songInfo.select("div.ellipsis.rank02 a").eq(0).text()
             );  // 가수
 
-            log.info("song : " + song);
-            log.info("singer : " + singer);
+//            log.info("song : " + song);
+//            log.info("singer : " + singer);
 
             // 가수와 노래 정보가 모두 수집되었다면, 저장함
             if ((!song.isEmpty()) && (!singer.isEmpty())) {
@@ -63,7 +63,7 @@ public class MelonService implements IMelonService {
                         .song(song)
                         .singer(singer).build();
 
-                log.debug("pDTO : " + pDTO);
+//                log.debug("pDTO : " + pDTO);
 
                 // 한번에 여러개의 데이터를 MongoDB 에 저장할 List 형태의 데이터 저장하기
                 pList.add(pDTO);
@@ -241,6 +241,63 @@ public class MelonService implements IMelonService {
 
         return rList;
         }
+    }
+
+    /**
+     * BTS 노래에 member 필드 추가하고,
+     * 그 member 필드에 BTS 멤버 이름들을 List 로 저장하기
+     *
+     * @param pDTO
+     */
+    @Override
+    public List<MelonDTO> updateAddField(MelonDTO pDTO) {
+        List<MelonDTO> rList = null;    // 변경된 데이터 조회 결과
+
+        // 수정할 컬렉션
+        String collectionName = getCollectionName();
+
+        // 기존 수집된 멜론Top100 수집한 컬렉션 삭제하기
+        melonMapper.dropCollection(collectionName);
+
+        // 멜론 top 100 수집하기
+        if (this.collectMelonSong() == 1) {
+            // 예 : nickname 필드를 추가하고, nickname 필드 값은 'BTS' 저장하기
+            if (melonMapper.updateAddField(collectionName, pDTO) == 1) {
+                // 변경된 값을 확인하기 위해 MongoDB 로부터 데이터 조회하기
+                rList = melonMapper.getSingerSongNickname(collectionName, pDTO);
+            }
+        }
+
+        return rList;
+    }
+
+    /**
+     * BTS 노래에 member 필드 추가하고,
+     * 그 member 필드에 BTS 멤버 이름들을 List 로 저장하기
+     *
+     * @param pDTO
+     */
+    @Override
+    public List<MelonDTO> updateFieldAndAddField(MelonDTO pDTO) {
+        List<MelonDTO> rList = null;
+
+        // 수정할 컬렉션
+        String collectionName = getCollectionName();
+
+        // 기존 수집된 멜론 top100 수집한 컬렉션 삭제하기
+        melonMapper.dropCollection(collectionName);
+
+        // 멜론 top100 수집하기
+        if (this.collectMelonSong() == 1) {
+            // MongoDb 에 데이터 저장하기
+            if (melonMapper.updateAddListField(collectionName, pDTO) == 1) {
+                // 변경된 값을 확인하기 위해 MongoDb 로부터 데이터 조회하기
+                rList = melonMapper.getSingerSongMember(collectionName, pDTO);
+            }
+        }
+
+        return rList;
+
     }
 
     private String getCollectionName() {

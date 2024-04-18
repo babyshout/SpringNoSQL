@@ -150,7 +150,6 @@ public class MelonController {
         ).orElseGet(ArrayList::new);
 
 
-
         return ResponseEntity.ok(
                 CommonApiResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rList)
         );
@@ -162,6 +161,41 @@ public class MelonController {
 
         // Java 8 부터 제공되는 Optional 활용하여 NPE(Null Pointer Exception) 처리
         List<MelonDTO> rList = Optional.ofNullable(melonService.updateField(pDTO)
+        ).orElseGet(ArrayList::new);
+
+        return ResponseEntity.ok(
+                CommonApiResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rList)
+        );
+    }
+
+    /**
+     * 가수 별명 추가하기
+     * 예 : 방탄소년단을 BTS 별명 추가하기
+     */
+    @PostMapping("updateAddField")
+    public ResponseEntity updateAddField(@RequestBody MelonDTO pDTO) {
+        log.trace(String.valueOf(pDTO));
+
+        // Java 8 부터 제공되는 Optional 활용하여 NPE (Null Pointer Exception) 처리
+        List<MelonDTO> rList = Optional.ofNullable(melonService.updateAddField(pDTO))
+                .orElseGet(ArrayList::new);
+
+        return ResponseEntity.ok(
+                CommonApiResponse.of(HttpStatus.OK, HttpStatus.OK.series().name(), rList)
+        );
+
+    }
+
+    /**
+     * 가수 멤버 이름들(List 구조 필드) 추가하기
+     */
+    @PostMapping("updateAddListField")
+    public ResponseEntity updateAddListField(@RequestBody MelonDTO pDTO) {
+        log.trace("pDTO : " + pDTO);
+
+        // Java 8 부터 제공하는 Optional 활용하여 NPE(Null Pointer Exception 처리)
+        List<MelonDTO> rList = Optional.ofNullable(
+                melonService.updateFieldAndAddField(pDTO)
         ).orElseGet(ArrayList::new);
 
         return ResponseEntity.ok(
