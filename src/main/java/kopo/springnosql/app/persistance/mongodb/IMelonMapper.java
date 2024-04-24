@@ -116,4 +116,28 @@ public interface IMelonMapper {
      * @return 노래 리스트
      */
     List<MelonDTO> getSingerSongMember(String collectionName, MelonDTO pDTO);
+
+    /**
+     * 가수이름, 노래제목 수정 및 신규필드 추가(복합 수정하기)
+     * @param collectionName 저장할 콜렉션 이름
+     * @param pDTO 저장할 가수이름, 수정될 노래제목, 추가 필드값
+     * @return 저장 결과
+     */
+    int updateFieldAndAddField(String collectionName, MelonDTO pDTO);
+
+    /**
+     * 가수의 노래 가져오기(임의 추가한 필드 포함 조회)
+     * @param collectionName 조회할 컬렉션 이름
+     * @param pDTO 가수명
+     * @return 노래 리스트
+     */
+    List<MelonDTO> getSingerSongAddData(String collectionName, MelonDTO pDTO);
+
+    /**
+     * 가수의 노래 삭제하기
+     * @param collectionName 저장할 컬렉션 이름
+     * @param pDTO 삭제할 가수 이름
+     * @return 저장 결과
+     */
+    int deleteDocument(String collectionName, MelonDTO pDTO);
 }

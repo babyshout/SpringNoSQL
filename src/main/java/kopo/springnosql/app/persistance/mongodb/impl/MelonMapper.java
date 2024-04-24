@@ -579,4 +579,129 @@ public class MelonMapper extends AbstractMongoDBCommon implements IMelonMapper {
 
         return rList;
     }
+
+    /**
+     * 가수이름, 노래제목 수정 및 신규필드 추가(복합 수정하기)
+     *
+     * @param collectionName 저장할 콜렉션 이름
+     * @param pDTO           저장할 가수이름, 수정될 노래제목, 추가 필드값
+     * @return 저장 결과
+     */
+    @Override
+    public int updateFieldAndAddField(String collectionName, MelonDTO pDTO) {
+        int res = 0;
+
+        MongoCollection<Document> col = mongodb.getCollection(collectionName);
+
+        String singer = CmmUtil.nvl(pDTO.singer());
+        String updateSinger = CmmUtil.nvl(pDTO.updateSinger());
+        String addFieldValue = CmmUtil.nvl(pDTO.addFieldValue());
+
+        log.info("pColNm : " + collectionName);
+        log.info("pDTO : " + pDTO);
+
+        // 조회할 조건(SQL 의 WHERE 역할 / SELECT * FROM MELON_20220321 where singer = '방탄소년단'
+        Document query = new Document();
+        query.append("singer", singer);
+
+        // MongoDB 데이터 삭제는 반드시 컬렉션을 조회하고, 조회된 ObjectId 를 기반으로 데이터를 삭제함
+        // MongoDB 환경은 분산환경(Sharding) 으로 구성될수 있기 때문에, 정확한 PK 에 매핑하기 위해서임
+        FindIterable<Document> rs = col.find(query);
+
+        // 한줄로 append 에서 수정할 필드 추가해도 되지만, 가독성이 떨어져 줄마다 append 함
+        Document updateDoc = new Document();
+        updateDoc.append("singer", updateSinger);   // 기존 필드 수정
+        updateDoc.append("addData", addFieldValue); // 신규 필드 추가
+
+        rs.forEach(doc -> col.updateOne(doc, new Document("$set", updateDoc)));
+
+        res = 1;
+
+        return res;
+    }
+
+    /**
+     * 가수의 노래 가져오기(임의 추가한 필드 포함 조회)
+     *
+     * @param collectionName 조회할 컬렉션 이름
+     * @param pDTO           가수명
+     * @return 노래 리스트
+     */
+    @Override
+    public List<MelonDTO> getSingerSongAddData(String collectionName, MelonDTO pDTO) {
+
+        // 조회 결과를 전달하기 위한 객체 생성하기
+        List<MelonDTO> rList = new LinkedList<>();
+
+        MongoCollection<Document> col = mongodb.getCollection(collectionName);
+
+        // 조회할 조건(SQL 의 where 역할)
+        Document query = new Document();
+        // 이전 실행에서 가수이름이 변경되어 변경시킨 값으로 적용
+        query.append("singer", CmmUtil.nvl(pDTO.updateSinger()));
+
+        // 조회 결과 중 출력할 컬럼들(SQL의 SELECT 절과 from 절 가운데 컬럼들과 유사)
+        Document projection = new Document();
+        projection.append("song", "$song");
+        projection.append("singer", "$singer");
+        projection.append("addData", "$addData");
+
+        // MongoDB 는 무조건 ObjectId 가 자동생성되며, ObjectId 는 사용하지 않을때, 조회할 필요가 없음
+        projection.append("_id", 0);
+
+        FindIterable<Document> rs = col.find(query).projection(projection);
+
+        for (Document doc : rs) {
+            // MongoDB 조회 결과를 MelonDTO 에 저장하기 위해 변수에 저장
+            String song = CmmUtil.nvl(doc.getString("song"));
+            String singer = CmmUtil.nvl(doc.getString("singer"));
+            String addData = CmmUtil.nvl(doc.getString("addData"));
+
+            MelonDTO rDTO = MelonDTO.builder()
+                    .song(song)
+                    .singer(singer)
+                    .addFieldValue(addData).build();
+
+            rList.add(rDTO);
+
+            log.info("rDTO : " + rDTO);
+        }
+        return rList;
+    }
+
+    /**
+     * 가수의 노래 삭제하기
+     *
+     * @param collectionName 저장할 컬렉션 이름
+     * @param pDTO           삭제할 가수 이름
+     * @return 저장 결과
+     */
+    @Override
+    public int deleteDocument(String collectionName, MelonDTO pDTO) {
+        int res = 0;
+
+        MongoCollection<Document> col = mongodb.getCollection(collectionName);
+
+        String singer = CmmUtil.nvl(pDTO.singer());
+
+        log.info("pColNm : " + collectionName);
+        log.info("pDTO : " + pDTO);
+
+        // 조회할 조건(SQL 의 WHERE 역할)
+        Document query = new Document();
+        query.append("singer", singer);
+
+        // MongoDB 데이터 삭제는 반드시 컬렉션을 조회하고, 조회된 ObjectId 를 기반으로 데이터를 삭제함
+        // MongoDB 환경은 분산환경(Sharding) 으로 구성될수 있기 때문에 정확한 PK 에 매핑하기 위해서임
+        FindIterable<Document> rs = col.find(query);
+
+        // 람다식 활용하여 데이터 삭제하기
+        // 전체 컬렉션에 있는 데이터들을 삭제하기
+        rs.forEach(col::deleteOne); // col 객체에 자동으로 매칭되어 실행될 함수 정의
+//        rs.forEach(doc -> col.deleteOne(doc));  // rs.forEach(col::deleteOne);  동일한 문법
+
+        res = 1;
+
+        return res;
+    }
 }

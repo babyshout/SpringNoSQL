@@ -278,7 +278,7 @@ public class MelonService implements IMelonService {
      * @param pDTO
      */
     @Override
-    public List<MelonDTO> updateFieldAndAddField(MelonDTO pDTO) {
+    public List<MelonDTO> updateAddListField(MelonDTO pDTO) {
         List<MelonDTO> rList = null;
 
         // 수정할 컬렉션
@@ -298,6 +298,61 @@ public class MelonService implements IMelonService {
 
         return rList;
 
+    }
+
+    /**
+     * 가수이름 수정 및 addData 필드 추가하기
+     *
+     * @param pDTO
+     */
+    @Override
+    public List<MelonDTO> updateFieldAndAddField(MelonDTO pDTO) {
+        List<MelonDTO> rList = null;    // 변경된 데이터 조회 결과
+
+        // 수정할 컬렉션
+        String collectionName = getCollectionName();
+
+        // 기존 수집된 멜론Top100 수집한 컬렉션 삭제하기
+        melonMapper.dropCollection(collectionName);
+
+        // 멜론Top100 수집하기
+        if (this.collectMelonSong() == 1) {
+            // MongoDb 에 데이터 수정하기
+            if (melonMapper.updateFieldAndAddField(collectionName, pDTO) == 1) {
+                // 변경된 값을 확인하기 위해 MongoDB 로부터 데이터 조회하기
+                rList = melonMapper.getSingerSongAddData(collectionName, pDTO);
+            }
+        }
+
+        return rList;
+    }
+
+    /**
+     * BTS 노래 삭제하기
+     *
+     * @param pDTO
+     * @return
+     */
+    @Override
+    public List<MelonDTO> deleteDocument(MelonDTO pDTO) {
+        List<MelonDTO> rList = null;
+
+        // 삭제할 컬렉션
+        String collectionName = getCollectionName();
+
+        // 기존 수집된 멜론Top100 수집한 컬렉션 삭제하기
+        melonMapper.dropCollection(collectionName);
+
+        // 멜론 Top100 수집하기
+        if (this.collectMelonSong() == 1) {
+            // MongoDB 에 데이터 삭제하기
+            if (melonMapper.deleteDocument(collectionName, pDTO) == 1) {
+                // 삭제된 값을 확인하기 위해 MongoDB 로부터 데이터 조회하기
+                rList = melonMapper.getSongList(collectionName);
+            }
+        }
+
+        return rList;
     }
 
     private String getCollectionName() {
