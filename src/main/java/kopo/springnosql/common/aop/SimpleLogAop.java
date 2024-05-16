@@ -51,7 +51,7 @@ public class SimpleLogAop {
 
         for (Object arg : args) {
             log.info("parameter type = {}", arg.getClass().getSimpleName());
-            log.info("parameter type = {}", arg);
+            log.info("parameter value = {}", arg);
         }
 
 //        log.info("================== method START name = {} ================", joinPoint.getSignature());
@@ -63,6 +63,10 @@ public class SimpleLogAop {
         Method method = getMethod(joinPoint);
 //        log.info("================== method END name = {} ================", joinPoint.getSignature());
 //        log.info("================== method END name = {} ================", method.getName());
+
+        if (returnObj == null) {
+            return;
+        }
 
         log.info("return type = {}", returnObj.getClass().getSimpleName());
         if (returnObj instanceof Collection<?>) {
