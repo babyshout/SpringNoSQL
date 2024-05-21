@@ -43,6 +43,7 @@ public class MelonMapper extends AbstractMongoDBCommon implements IMelonMapper {
         int res = 0;
 
         if (pList == null) {
+            log.warn("parameter is NULL!");
             pList = new LinkedList<>();
         }
 
@@ -104,7 +105,7 @@ public class MelonMapper extends AbstractMongoDBCommon implements IMelonMapper {
         FindIterable<Document> myRs = collection.find();
 
         for (Document doc : myRs) {
-            log.trace("myRs : " + myRs);
+//            log.trace("myRs : " + myRs);
         }
 
 
@@ -112,7 +113,7 @@ public class MelonMapper extends AbstractMongoDBCommon implements IMelonMapper {
             String song = CmmUtil.nvl(doc.getString("song"));
             String singer = CmmUtil.nvl(doc.getString("singer"));
 
-            log.info("song : " + song + "/ singer : " + singer);
+//            log.info("song : " + song + "/ singer : " + singer);
 
             MelonDTO rDTO = MelonDTO.builder()
                     .song(song)

@@ -2,6 +2,7 @@ package kopo.springnosql.app.service.impl;
 
 import kopo.springnosql.app.dto.MelonDTO;
 import kopo.springnosql.app.persistance.mongodb.IMelonMapper;
+import kopo.springnosql.app.persistance.redis.IMelonCacheMapper;
 import kopo.springnosql.app.service.IMelonService;
 import kopo.springnosql.common.util.CmmUtil;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +24,9 @@ import java.util.List;
 @Service
 public class MelonService implements IMelonService {
 
-    private final IMelonMapper melonMapper;
+    private final IMelonMapper melonMapper; // MongoDB 에 저장할 Mapper
+
+    private final IMelonCacheMapper melonCacheMapper;   // RedisDB Mapper
 
     /**
      * 멜론 차트 수집 함수(웹 크롤링)
@@ -96,6 +99,11 @@ public class MelonService implements IMelonService {
         // MongoDB 에 데이터 저장하기
         res = melonMapper.insertSong(rList, collectionName);
 
+        if (!melonCacheMapper.getExistKey(collectionName)) {
+            log.info("getExistKey is false!!");
+            res = melonCacheMapper.insertSong(rList, collectionName);    // redisDB 에 저장하기
+        }
+
         // 로그 찍기(추후 찍은 로그를 통해 이 함수에 접근했는지 파악하기 용이하다.)
         log.info(this.getClass().getName() + ".collectMelonSong END!!!");
 
@@ -114,7 +122,15 @@ public class MelonService implements IMelonService {
         log.debug("collectionName : " +collectionName);
 
         // MongoDB 에서 데이터 가져오기
-        List<MelonDTO> rList = melonMapper.getSongList(collectionName);
+        List<MelonDTO> rList;
+        if (melonCacheMapper.getExistKey(collectionName)) { // redisDb 에 데이터가 존재하면
+            log.info("redisDB 에 데이터 있음!!");
+            rList = melonCacheMapper.getSongList(collectionName);   // redisDB 에서 데이터 가져오기
+        }
+        else{   // redisDB 에 데이터가 없으면
+            log.info("redisDB 에 데이터 없음!!");
+            rList = melonMapper.getSongList(collectionName);    // MongoDB 에서 데이터 가져오기
+        }
 
         log.debug("rList.size() : " + rList.size());
 
