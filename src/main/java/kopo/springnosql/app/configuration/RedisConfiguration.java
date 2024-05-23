@@ -17,7 +17,8 @@ public class RedisConfiguration {
     @Value("${spring.data.redis.port}")
     private int redisPort;
 
-    @Value("${spring.data.redis.username}")
+    // NOTE AWS 서버에 username 이 사용 안되도록 세팅되어있어 주석처리
+//    @Value("${spring.data.redis.username}")
     private String redisUserName;
 
     @Value("${spring.data.redis.password}")
